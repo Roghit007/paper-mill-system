@@ -1,0 +1,30 @@
+/* Layout: sidebar on the left, page content on the right */
+.app-content { margin-left: 260px; min-width: 0; }
+.menu-btn, .app-overlay { display: none; }
+
+/* Tablets and phones */
+@media (max-width: 900px) {
+  .app-content { margin-left: 0; padding-top: 56px; }
+
+  .menu-btn {
+    display: block; position: fixed; top: 10px; left: 10px; z-index: 1100;
+    background: #1e293b; color: white; border: none; border-radius: 8px;
+    padding: 8px 14px; font-size: 18px; cursor: pointer;
+  }
+  .app-overlay {
+    display: block; position: fixed; inset: 0; z-index: 1040; background: rgba(0, 0, 0, 0.4);
+  }
+  .app-sidebar { transform: translateX(-100%); transition: transform 0.2s; z-index: 1050; }
+  .app-sidebar.open { transform: none; }
+
+  /* forms become one column */
+  .app-content form { grid-template-columns: 1fr !important; }
+  .app-content form button[type="submit"] { grid-column: auto !important; }
+
+  /* wide tables scroll sideways instead of breaking the page */
+  .app-content table { display: block; overflow-x: auto; white-space: nowrap; }
+
+  /* dashboard charts stack */
+  .charts-grid { grid-template-columns: 1fr !important; }
+  .charts-grid > div { grid-column: auto !important; }
+}
