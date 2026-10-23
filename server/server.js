@@ -43,6 +43,17 @@ app.use(cors({
 app.use(express.json({ limit: '10kb' }));
 app.use(sanitize);
 
+// Connect to MongoDB on demand (needed for serverless)
+app.use('/api', async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (e) {
+    console.error('DB connection failed:', e.message);
+    res.status(500).json({ message: 'Database connection failed' });
+  }
+});
+
 // Login brute-force protection: 10 failed attempts per 15 minutes per IP
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -92,8 +103,14 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB first, then accept requests
-(async () => {
-  await connectDB();
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-})();
+// Run a normal server locally; on Vercel the app is exported instead
+if (require.main === module) {
+  connectDB()
+    .then(() => app.listen(PORT, () => console.log(`Server running on port ${PORT}`)))
+    .catch((e) => {
+      console.error(`Error: ${e.message}`);
+      process.exit(1);
+    });
+}
+
+module.exports = app;
